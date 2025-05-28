@@ -103,3 +103,27 @@ fontFamily: "Roboto"),
 引数には、**ARGB**の各地を０～２５５の整数で指定する。
 
 # 第３章
+## ボタン・ウィジェット
+### TextButtonについて
+「**TextButton**」というクラスとして用意されています。Flutter Studioでは「**Material**」ジャンルの中にある。
+>ちなみに「Flutter Studio」では、**TextButton**のことを**FlatButton**とも呼ぶらしぃ。
+
+「FlatButton」というアイコンがTextButtonに相当する。これをプレビューにドラック＆ドロップするとフラットボタンが配置できる。  
+TextButtonのプロパティとしては「**Size**」、「**Weight**」があり、これはTextButtonの言葉のテキストフォントのサイズと太さを指定するプロパティがある。
+
+### TextButtonの基本形
+
+```
+TextButton(key:null,
+    onPressed: 関数,
+    child: ウィジェット
+)
+```
+**onPressed**は、このTextButtonをクリックした時に実行される処理を指定するための値。  
+今回の例では、**buttonPressed**と設定されているので、ボタンをクリックすると**buttonPressedメソッド**が呼び出されるようになる
+### アイコンを表示する
+TextButtonにテキストが表示されているのは内部にテキストが読み込まれているから、なのでTextの代わりに別のウィジェットを組み込めば、表示が変えられる。
+
+
+
+
