@@ -111,6 +111,67 @@ fontFamily: "Roboto"),
 「FlatButton」というアイコンがTextButtonに相当する。これをプレビューにドラック＆ドロップするとフラットボタンが配置できる。  
 TextButtonのプロパティとしては「**Size**」、「**Weight**」があり、これはTextButtonの言葉のテキストフォントのサイズと太さを指定するプロパティがある。
 
+### TextButtonの利用
+FlatButtonを使った例です。 **↓**
+```
+class _MyHomePageState extends State<MyHomePage> {
+  static var _message = 'ok.';
+  static var _janken = <String>['グー', 'チョキ', 'パー'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('App Name'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                _message,
+                style: TextStyle(
+                  fontSize: 32.0,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: "Roboto"),
+              ),
+            ),
+            TextButton(
+              onPressed: buttonPressed,
+              child: Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  "Push me!",
+                  style: TextStyle(
+                    fontSize: 32.0,
+                    color: const Color(0xff000000),
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Roboto"),
+                )
+              )
+            )
+          ]
+        ),
+      ),
+    );
+  }
+
+  void buttonPressed() {
+    setState(() {
+      _message = (_janken..shuffle()).first;
+    });
+  }
+}
+
+```
+
+
+このコードはボタンを押すとランダムにじゃんけんの手が出てきます。  
+ここでは_messageに_janken...shuffle()シャッフルしたListの最初の項目を取り出している。shuffleに、Listの項目をランダムに入れ替えるものですが、voidなので値は返しません。そこで **カスケード記法(..演算子)** をつかい、元のオブジェクトからfirstで最初の要素を取り出す。
 ### TextButtonの基本形
 
 ```
@@ -122,8 +183,73 @@ TextButton(key:null,
 **onPressed**は、このTextButtonをクリックした時に実行される処理を指定するための値。  
 今回の例では、**buttonPressed**と設定されているので、ボタンをクリックすると**buttonPressedメソッド**が呼び出されるようになる
 ### アイコンを表示する
-TextButtonにテキストが表示されているのは内部にテキストが読み込まれているから、なのでTextの代わりに別のウィジェットを組み込めば、表示が変えられる。
+TextButtonにテキストが表示されているのは内部にテキストが読み込まれているから、なのでTextの代わりに別のウィジェットを組み込めば、表示が変えられる。  
+表示方法は以下の通り
+```
+TextButton(
+    onPressed:buttonPressed,
+    child: Padding(
+        padding: EdgeInsets.all(10.0),
+        child:Icon (
+            Icons.android,
+            size: 50.0,
+        )
+    )
+)
+```
 
+これを実行すると、テキストではなく、Androidのアイコンが表示される。
 
+### buttonPressedメソッドについて
+クリックした時の処理については、「onPressed:buttonPressed」とメソッドを設定している。このメソッドは、以下のように定義している。
 
+```
+void buttonPressed(){
+    setState((){
+        _message = (_janken..shuffle()).first;
+    });
+}
+```
+引数無し、戻り値なしのシンプルなメソッドです。
+
+### Paddingについて
+先ほどのソースコードにTextButtonのほかにも新しいクラスが使わています。それは「Padding」というものです。
+```
+children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                _message,
+                style: TextStyle(
+                  fontSize: 32.0,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: "Roboto"),
+              ),
+            ),
+            TextButton(
+              onPressed: buttonPressed,
+              child: Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text()
+```
+
+### ElvatedButtonについて
+TextButtonと同じような働きをするものに「**ElevatedButton**」というものもあります。
+同じボタンだけどこっちのボタンは立体的に表示される。
+Flutter Studioでは、「Material」の中の「RaisedButton」としてアイコンが用意されている～～♪
+
+### ElevatedButtonの利用
+利用した例
+```
+ElevatedButton(
+    onPressed:buttonPressed,
+    child: Padding(
+        padding: EdgeInsets.all(10.0),
+        child:Icon (
+            Icons.android,
+            size: 50.0,
+        )
+    )
+)
+```
 
