@@ -3,6 +3,21 @@
 Flutterは、マルチプラットフォームのための開発環境です。  
 あらゆるプラットフォームを１つのコードだけですべて作れるようにするそれがFlutterが目指すところ。
 
+### Flutterのメリット・デメリット
+|メリット||
+|---|---|
+|マルチプラットフォーム対応|Android、iOS、Web、Windows、macOS、Linuxまで1つのコードで動く|
+|高速な開発（Hot Reload）|画面の変更が即反映される|
+|洗練されたUIデザイン|Material DesignもCupertinoも対応だから、Google風にもApple風にもできる|
+|パフォーマンスが高い|ネイティブ並みに動作が軽快。Dartで直接コンパイルするから高速|
+
+|デメリット||
+|---|---|
+|アプリサイズが大きめ|Webやデスクトップ向けに出すとファイルが大きくなりがち|
+| ネイティブ機能へのアクセスがやや面倒|カメラやBluetoothなど、細かいデバイス機能はプラグインやネイティブコードが必要。|
+|Webサポートはまだ発展途上|対応はしてるけど、パフォーマンスや動作の安定性はまだまだこれから。|
+|Dart言語の習得が必要|ちょっとマイナーな言語だから、慣れるまで戸惑う|
+
 ### 専用 SDK による開発
 Flutterは、AndroidやiOSのプラットフォーム上にFlutter独自のフレームワークを用意し、  
 これを利用してアプリを作成することができる。  
@@ -50,9 +65,6 @@ https://docs.flutter.dev/set-started/install
 続いては、**Android Studio**をダウンロードするためのアドレスがこちら　**→**
 https://developer.android.com/studio/?hl=ja
 
-### プロジェクト実行
-
-
 # 第２章
 ## ウィジェットの基本レイアウト
 
@@ -96,6 +108,12 @@ fontFamily: "Roboto"),
 
 ### Colorについて
 ```color: const Color(0x000000),```  
+|||
+|---|---|
+|0x|進数|
+|ff・00など|明度 , ff = 100% ・ 00 = 0%|
+|00ffff・9acd32など|RGB・カラーコード|
+
 引数には６または８桁の１６進数で指定する。  これにより**RGB**または**ARGB**の値を指定できる。
 
 この他にも**ARBG**の値を個別で引数で指定してインスタンスを作成するメソッドも用意されている。  
@@ -253,3 +271,290 @@ ElevatedButton(
 )
 ```
 # 第４章
+
+## AppBerについて
+ここまでのアプリの基本画面は、Scaffoldをベースにして来ました。  
+Scaffoldはアプリの画面を構成する基本的な要素を一通り備えています。  
+ここまでのサンプルは**appBer**に***アプリケーションバー***、**body**に***アプリのコンテンツ*** を設定してきた。
+
+### AppBerの基本形
+AppBerではtitleにTextを用意することでタイトルの表示が行えます。  
+AppBerが用意されているプロパティは他にもあり、それらを含めたインスタンス作成の基本形をまとめたものがこちらになります♪
+```
+Appber(
+  title: ウィジェット,
+  leading: ウィジェット,
+  actions: <Widget>[ ウィジェットのリスト ]
+  bottom:　《PreferredSize》,
+)
+```
+|||
+|--|--|
+|title|タイトル表示部分。通常はTextを用意|
+|leading|左端に表示される。通常はボタンかアイコンを表示|
+|actions|タイトルの右側に表示される。ボタン・アイコン・などのリストを用意。|
+|bottom|上記の下に追加表示される部分。PreferredSizeインスタンスを用意。|
+
+bottomは特別な用途などがない限りあまり使わない。  
+bottomを使うには**PreferredSize**というクラスを使います。これはデバイスの画面サイズなどに応じた最適なサイズを調整が出来る。
+
+### AppBerをカスタマイズする
+前章から利用しているサンプルを使い、_MyHomePageStateクラスを以下のリストのように書き換えてください。
+```
+class _MyHomePageState extends State<MyHomePage> {
+  static var _message = 'ok';
+  static var _stars = '☆☆☆☆☆';
+  static var _star = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My App'),
+        leading: BackButton(
+          color: Colors.white,
+        ),
+
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.android),
+            tooltip: 'add star...',
+            onPressed: iconPressedA,
+          ),
+          IconButton(
+            icon: Icon(Icons.favorite),
+            tooltip: 'subtract star...',
+            onPressed: iconPressedB,
+          ),
+        ],
+
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(30.0),
+          child: Center(
+            child: Text(_stars,
+              style: TextStyle(
+                fontSize: 22.0,
+                color:Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+
+      body: Center(
+          child: Text(
+            _message,
+            style: const TextStyle(
+              fontSize: 28.0,
+            ),
+          )
+      ),
+    );
+  }
+
+  void iconPressedA() {
+    _message = 'tap "android".';
+    _star++;
+    update();
+  }
+  void iconPressedB() {
+    _message = 'tap "favorite".';
+    _star--;
+    update();
+  }
+
+  void update() {
+    _star = _star < 0 ? 0 : _star > 5 ? 5 : _star;
+    setState(() {
+      _stars = '★★★★★☆☆☆☆☆'.substring(5 - _star, 5 - _star + 5) ;
+      _message = _message + '[$_star]';
+    });
+  }
+}
+```
+### BackButtonについて
+leadingは以下のようにウィジェットが設定されている。
+```
+leading: BackButton(
+  color: Colors.white,
+)
+```
+ここで使っている「**BackButton**」というのは「前に戻る」ための専用ボタンです。  
+BackButtonは、colorでアイコンの色を指定するだけで、他には特にプロパティはありません。
+
+### actionsのアイコンについて
+**actions**はウィジェットのリストを用意します。
+```
+actions: <Widget>[
+  IconButton(
+    icon: Icon(Icons.android),
+    tooltip: 'add ster...',
+    onPressed: iconPressedA,
+  ),
+  -----略-----
+],
+```
+### bottom の表示
+**bottom**は、★マークのテキストを表示させている。作る場合は以下のように
+
+```
+bottom: PreferredSize(
+  preferredSize: const Size.fromHeight(30.0),
+  child: Canter(
+    child: Text(_stars,
+      style: TextStyle(
+        fontSize: 22.0,
+        color:Colors.white,
+      ),
+    ),
+  ),
+),
+```
+
+**PreferredSize**はサイズを示すpreferredSizeと、中に組み込むchildを用意します。  
+preferredSizeにはSizeクラスの「fromHeight」というものを使い高さ30の大きさに設定してる  
+chileにはTextを用意しています。
+
+### BottomNavigationBarについて
+Scaffoldでは、AppBerのように画面の上部だけではなく、下部にもバーを表示することができる。  
+これを実現するのが「**BottomNavigationBar**」です。  
+**BottomNavigationBar**というウィジェットを組み込むことで、アイコンを表示し、クリックして操作ができるようになる。
+
+### BottomNavigationBarの利用
+例として「_MyHomePageState」というクラスにして以下のように書いてください。
+
+```
+class _MyHomePageState extends State<MyHomePage> {
+  static var _message = 'ok';
+  static var _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My App'),
+      ),
+      body: Center(
+        child: Text(
+          _message,
+          style: const TextStyle(
+            fontSize: 28.0,
+          ),
+        )
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _index,
+        backgroundColor: Colors.lightBlueAccent,
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            label: 'Android',
+            icon: Icon(Icons.android,color: Colors.black, size: 50),
+          ),
+          BottomNavigationBarItem(
+            label: 'Favorite',
+            icon: Icon(Icons.favorite,color: Colors.red, size: 50),
+          ),
+          BottomNavigationBarItem(
+            label: 'Home',
+            icon: Icon(Icons.home,color: Colors.white, size: 50),
+          ),
+        ],
+        onTap: tapBottomIcon,
+      ),
+    );
+  }
+
+  void tapBottomIcon(int value) {
+    var items = ['Android', 'Heart', 'Home'];
+    setState(() {
+      _index = value;
+      _message = 'you tapped: "' + items[_index] + '".';
+    });
+  }
+}
+
+```
+実行すると、下部に3つのアイコンを表示したバーが表示されます。  
+アイコンをクリックするとそのアイコンが選択され、「you tapped: "〇〇"」とメッセージが表示されます。
+
+### BottomNavigationBarの仕組み
+このBottomNavigationBarはAppBerのように、ただアイコンやボタンを追加してイベント処理を書けばいいというわけではありません。  
+BottomNavigationBarインスタンスの作成をどのように行っているのか整理すると以下のようになります。
+
+```
+BototomNavigationBer(
+  currentIndex: 《int値》,
+  items: <BottomNavigationBerItem>[ リスト ],
+  onTap: 関数
+)
+```
+|||
+|---|---|
+|**currentIndex**|現在、選択されている項目のインデックス。これの設定されたインデックスのアイコン（BottomNavigationBarItem）が選択状態で表示される。|
+|**items**|表示する項目。BottomNavigationBarItemインスタンスのリストとして用意|
+|**onTap**|バーに表示されているアイコンをクリックしたときに呼び出される処理|
+
+# 第6章
+## ファイルアクセス
+### Fileクラスとファイナルアクセス
+Dart言語には、アプリに必要な情報をテキストファイルに保存したり読み込んだりする機能が用意されている。  
+これを利用すれば、そう難しくなくファイルアクセス処理を実装できます。  
+(**※ファイルアクセスを行うFileクラスは、Webアプリでは正常に動作できません。
+これを利用したサンプルは、スマートフォンかPC用のアプリで動作確認をしてください**)  
+
+#### Fileクラスについて
+ファイルを扱うためには、「**File**」というクラスを利用します。以下のようにしてインスタンスを作成します。
+```
+File( ファイルパス )
+```
+このFileには、ファイルへの読み書きを行うためのメソッドです。
+
+#### ファイルへの書きだし
+ファイルへの値の書き出しは、Fileクラスの「**WriteAsString**」というメソッドを利用します。以下のように行う
+
+```
+Future<File> writeAsString( [String] );
+```
+引数には、保存するテキストの値を指定します。  
+これだけで、指定のテキストファイルにテキストを書きだします。  
+このメソッドは非同期で実行されるため、戻り値には保存されたFileが**Future**<**File**>という形で返されます。  
+同期処理した場合は以下のようなメソッドもあります。
+```
+void writeAsStringSync( [String] );
+```
+こちらはvoidなので戻り値はありません。  
+ただ実行するだけでファイルにテキストが保存されます。
+#### ファイルからの読み込み
+ファイルからの読み込みには、Fileクラスの「**readAsString**」というメソッドを使います。
+```
+try {
+  変数 = await [File].readAsString();
+} catch (e) {}
+```
+このreadAsStringメソッドは、例外を発生させるため、try内で実行するのが基本です。  
+戻り値はファイルから読み込んだテキストの値(String)になります。  
+これも非同期メソッドです。そして戻り値からthenでテキストを取り出します。
+```
+[Future<File>].then((String value){.....valueを利用する処理.....});
+```
+thenの関数の引数に、取り出されたテキストが渡されるので、あとはそれを利用して処理をすればいいでしょう。  
+
+これも、同期で読み込みを行うメソッドが用意されています。
+```
+try {
+  変数 = [File].readAsStringSync();
+} catch (e) {}
+```
+こちらは、戻り値として読み込んだテキストが返されるので、これをそのまま利用すればいいです。
+
+### Path Providerのインストール
+実際にファイルアクセスを行うには、実はパッケージを1つ追加する必要があります。  
+「**Path Provider**」というもんで、これはプロジェクトのpubspec.yamlファイルに設定を記述します。  
+このファイル内に、dependenciec:という記述があります。その後に、インデントをしてPath Providerを記述します。  
+```
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider: any
+```
+
