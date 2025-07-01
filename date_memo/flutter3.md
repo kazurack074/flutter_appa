@@ -70,6 +70,9 @@ https://developer.android.com/studio/?hl=ja
 
 "https://flutterstudio.app/"　←　Flutter Studioの画面を表示し、レイアウトを作成できる
 
+こんな感じの画面です。
+![Flutter Studio](../../png/Flutter_Studio.png)
+
 ### レイアウトのソースコード
 レイアウトのソースコードをコピーしてVSCodeで作成していたプロジェクトのソースコードを差し替えて実行し、動かしてみるとちゃんとレイアウトされてるか正確に確認ができるようになる。
 
@@ -557,4 +560,168 @@ dependencies:
     sdk: flutter
   path_provider: any
 ```
+これで、ビルド時にPath Providerが追加され利用できるようになります。  
+このPath Providerは、アプリのファイルを保存する場所を調べる機能を追加します。  
+ちなみにパソコンは問題ないんだけどスマホの場合は適当な場所にファイルを保存しようとしても失敗します。  
+### ファイルアクセスの例
+```
+import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
+void main()=> runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Generated App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        primaryColor: const Color(0xff2196f3),
+        canvasColor: const Color(0xfffafafa),
+      ),
+      home: MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final _controller = TextEditingController();
+  final _fname = 'flutter_sampledata.txt';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20.0),
+        child:Column(
+          children:<Widget>[
+            Text('FILE ACCESS.',
+              style: TextStyle(fontSize: 32,
+                fontWeight: ui.FontWeight.w500),
+            ),
+            Padding(padding: EdgeInsets.all(10.0)),
+            TextField(
+              controller: _controller,
+              style: TextStyle(fontSize: 24),
+              minLines: 1,
+              maxLines: 5,
+            )
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.blue,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white,
+        currentIndex: 0,
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            label: 'Save',
+            icon: Icon(Icons.save, color: Colors.white, size:32),
+          ),
+          BottomNavigationBarItem(
+            label: 'Load',
+            icon: Icon(Icons.open_in_new, color: Colors.white, size:32),
+          ),
+        ],
+        onTap: (int value) async {
+          switch (value) {
+            case 0:
+              saveIt(_controller.text);
+              setState(() {
+                _controller.text = '';
+              });
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title: Text("saved!"),
+                  content: Text("save message to file."),
+                )
+              );
+              break;
+            case 1:
+            String value =  await loadIt();
+            setState(() {
+              _controller.text = value;
+            });
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: Text("loaded!"),
+                content: Text("load message from file."),
+              )
+            );
+            break;
+            default:
+              print('no defalut.');
+          }
+        },
+      ),
+    );
+  }
+
+  Future<File> getDataFile(String filename) async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File(directory.path + '/' + filename);
+  }
+
+  void saveIt(String value) async {
+    final file = await getDataFile(_fname);
+    file.writeAsString(value);
+  }
+
+  Future<String> loadIt() async {
+    try {
+      final file = await getDataFile(_fname);
+      return file.readAsString();
+    } catch (e) {
+      return '*** no data ***';
+    }
+  }
+}
+
+```
+### ファイルアクセスの流れを整理する
+３つのファイル関連のメソッドを追加し、それらを呼びだして読み書きを行っています。
+#### getDataFile メソッドについて
+これらはファイルアクセスの前に必要となる「**File**」インスタンスを得るための処理を行っている。
+```
+Future<File> getDataFile(Storing filename) async {
+  file directory = await getApplicationDocumentsDirectory();
+  return File(directory.path + '/' + filename);
+}
+```
+見て分かるように、これは非同期メソッドとして定義してあります。  
+内部で利用しているのが非同期関数であるため、このメソッド自体も非同期になっています。  
+#### 割り当てられたフォルダパスの取得
+```
+file directory = await getApplicationDocumentsDirectory();
+```
+まず最初が**getApplicationDocumentsDirectory**という関数の呼び出しです。  
+これが、Path Providerにより使えるようになった機能です。  
+これは、アプリに割り当てられているドキュメントフォルダを調べて返すものです。  
+戻り値は**Future<**Directory**>**、すなわち**Directory**というクラスのインスタンスを戻り値として返すFutureになっています。
+
+#### ファイルパスの取得
+```
+return File(directory.path + '/' + filename);
+```
+Directoryでは、**path**プロパティでパスをStringとして取り出すことができる。  
+その後にfilenameをファイル名として追加し、Fileでインスタンスを作成します。  
+このFileをreturnし、そこから必要な処理を行います。
+
+#### savelt メソッドについて
