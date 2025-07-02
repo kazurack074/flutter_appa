@@ -521,6 +521,13 @@ Future<File> writeAsString( [String] );
 引数には、保存するテキストの値を指定します。  
 これだけで、指定のテキストファイルにテキストを書きだします。  
 このメソッドは非同期で実行されるため、戻り値には保存されたFileが**Future**<**File**>という形で返されます。  
+
+##### ※そもそも非同期とは？
+「**ある作業をしてる間に、別の作業も同時に進められる**」ということです。
+##### ※じゃあその逆の同期とは？
+「**一個の作業をしてる際に、別の作業ができない**」ということです。  
+
+
 同期処理した場合は以下のようなメソッドもあります。
 ```
 void writeAsStringSync( [String] );
@@ -725,3 +732,83 @@ Directoryでは、**path**プロパティでパスをStringとして取り出す
 このFileをreturnし、そこから必要な処理を行います。
 
 #### savelt メソッドについて
+ファイルへのテキストの保存は、saveItメソッドとして用意してあります。
+```
+void saveIt(String value) async {
+  final file = getDataFile(_fname);
+  file.writeAsString(value);
+}
+```
+これも、非同期メソッドとして定義されています。  
+ここで行っているのは、**getDataFile**を呼び出してFileインスタンスを取得し、これを利用してテキストを書き出す処理です。
+
+getDataFileの呼び出し
+```
+final file = await getDataFile(_fname);
+```
+getDataFileは、非同期で**Future**＜**File**＞が返されるようになっています。  
+サンプルではthenを使わず、awaitでFileの取得をまってから取り出しています。
+
+#### 値の書き出し
+```
+file.writeAsString(value);
+```
+then内の関数で実行しているのは、引数で渡されるFile内のwriteAsStringメソッドを呼び出してテキストをファイルに書き出す処理です。  
+これで値の保存ができました。
+
+#### loadItメソッドについて
+テキストの読み込みを行うloadItメソッドです。  
+これも非同期メソッドとして定義されています。
+
+```
+Future<String> loadIt() async {
+  try {
+    final file = await getDataFile(_fname);
+    return file.readAsString();
+  } catch (e) {
+    return '*** no data ***';
+  }
+}
+```
+読み込みを行うメソッドが例外を発生させるため、try内で処理を行うようにしてあります。
+
+#### getDataFileの呼び出し
+```
+final file = await getDataFile(_fname);
+```
+まず、getDataFileを呼び出してFileを取得します。  
+これはFutureを返す非同期メソッドですが、今回はthenを使わずにawaitでFileを待ってから取り出すようにしています。
+
+#### Future<String>を返す
+```
+return file.readAsString();
+```
+取り出したFileから、readAsStringを呼び出し、その戻り値を返します。  
+これで、読み込んだStringがFutureとして返されます。
+#### savelt/loadit の呼び出し
+これらのメソッド（saveIt/loadIt）の呼び出しではナビゲーションバーのアイコンから処理を呼び出しています。  
+onTopを見ると、このようになっています。
+```
+onTop:(int value) {
+  switch (value) {
+    case 0:
+        ・・・・保存の処理・・・・
+    case 1:
+        ・・・・読み込みの処理・・・・
+    default:
+        print('no defalut.');
+  }
+}
+```
+#### saveltの呼び出し
+保存の処理は、saveItを読み込んだ後、入力フィールドを空にしています。  
+アラートを表示をしています。
+```
+saveaIt(_controller.text);
+setString(() {
+  _controller.text = '';
+})
+```
+saveItの引数には_controller.textを指定してます。これで入力テキストを保存ができます。そのあとに、setSateで_controller.textを空にしています。
+saveItは非同期ですが、setStateはコールバック関数で実行する必要はありません。
+ここではsaveItの戻り値を待って処理する必要がないので、saveItの後、ただsetStateするだけです。
