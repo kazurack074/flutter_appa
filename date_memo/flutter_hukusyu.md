@@ -248,6 +248,20 @@ itemごとに動きを変える場合は**引数のint型の値を使用**
 各項目はListTileという専用のウィジェットを使うと便利で  
 選択されているかどうかやクリックや長押しのイベントも設置可能
 
+Navigator：LIFO（スタック）式で、画面遷移を実現するための機能（クラス）  
+P158～  
+MaterialPageRoute：Routeクラスの孫クラス  
+
+Pushの時の動き：  
+    画面　→　MaterialPageRouteに変換　→　Navigatorに保存
+
+Popの時の動き：  
+    Navigatorから取得　→　MaterialPageRouteに変換　→　画面
+
+表現間のデータの受け渡しについてはP162～165をよく読む
+
+routes：アドレスを事前に決めておくことで、毎回Routeクラスを書かないための設定値  
+    処理がよりシンプルになる
 
 
 
